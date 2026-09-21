@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: habit-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - habit-network
+
+  backend:
+    build: ./backend
+    container_name: habit-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGO_URI=mongodb://mongo:27017/HabitTracker
+      - JWT_SECRET=koi_bhi_random_string_daalo
+    depends_on:
+      - mongo
+    networks:
+      - habit-network
+
+  frontend:
+    build: ./frontend
+    container_name: habit-frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - habit-network
+
+networks:
+  habit-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
